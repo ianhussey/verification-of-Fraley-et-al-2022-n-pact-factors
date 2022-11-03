@@ -19,7 +19,7 @@ knitr::opts_chunk$set(message = FALSE,
 
 ```
 
-# Install packages and import data
+# Dependencies
 
 ```{r}
 library(pwr)
