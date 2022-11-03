@@ -130,6 +130,8 @@ data_combined |>
 
 Using between-persons designs only.
 
+Results represent Median N (k studies)
+
 ```{r}
 
 # filter to include only between ("b") group designs ("D")
