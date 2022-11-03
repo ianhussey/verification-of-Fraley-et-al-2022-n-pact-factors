@@ -1,0 +1,299 @@
+---
+title: "Fraley et al. (2022) N-pact factor"
+subtitle: "Assessment of computational reproducibility via refactoring of Fraley's code"
+author: "Ian Hussey"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    highlight: haddock
+    theme: flatly
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(message = FALSE, 
+                      warning = FALSE)
+
+```
+
+# Install packages and import data
+
+```{r}
+library(pwr)
+library(tidyverse)
+library(janitor)
+library(viridis)
+library(knitr)
+library(kableExtra)
+
+```
+
+# Data
+
+Fraley's commented out code for data wrangling, below, was run once to create data_combined.csv. All future runs simply loaded data_combined.csv and ran analyses on it.
+
+```{r}
+
+# # Create something that combines data4 (JC) and data5 (AKG)
+# #try relabel the cols of JC data4
+# 
+# # Analyses for N-Pact 2011-2019
+# # Raw data are stored in two files. They'll be imported and merged here.
+# 
+# # Read data file from current directory
+# 
+# data5 = read.csv("../data/raw/dataAKG.csv", stringsAsFactors=FALSE)	# AKG phase
+# data4 = read.csv("../data/raw/data4.csv", stringsAsFactors=FALSE)	# JC phase
+#
+# data3 = data4[,c("Index", "Random", "PDF", "PDF","Social","JPSP_Section",
+#                  "Journal","Year","Title","Journal","TotalStudiesA","N1A","Design","CommentsA",
+#                  "CoderA","TotalStudiesB","N1B","Design","CommentsB","CoderB","coder_dif","coder_disagree","ChrisResolve","CommentsChris",
+#                  "Design","N","Design")]
+# 
+# 
+# colnames(data3) = c("Index",          "Random" ,        "Target_PDF",     "PDF",            "Social_PS",     
+#                     "JPSP_Section",   "Journal",        "Year",           "Title",          "Journal_full",  
+#                     "num_studiesa",   "na",             "DA",             "commentsa",      "codera",        
+#                     "num_studiesb",   "nb",             "DB",             "commentsb",      "coderb" ,       
+#                     "coder_dif",      "coder_disagree", "ChrisResolve",   "ChrisNotes",     "ChrisD",        
+#                     "N" ,             "D"   )
+# 
+# 
+# data6 = rbind(data3, data5)
+# 
+# dim(data6)
+# 
+#
+#
+#
+# data_combined <- data6
+#
+# #to simplify things, replace "" with NA for data_combined$D
+#
+# data_combined$D[which(data_combined$D=="")]=NA
+# 
+# data_combined <- data_combined |>
+#   mutate(Journal = ifelse(Journal == "PS", "PS:S", Journal))
+#
+# write_csv(data_combined, "../data/processed/data_combined.csv")
+data_combined <- read_csv("../data/processed/data_combined.csv")
+
+```
+
+# Descriptives
+
+How many articles were coded? 
+
+```{r}
+
+data_combined |>
+  filter(!is.na(N)) |>
+  distinct(Title) |>
+  count(name = "k articles") |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+
+```
+
+How many studies were coded? 
+
+```{r}
+
+data_combined |>
+  filter(!is.na(N)) |>
+  count(name = "k studies") |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+  
+```
+
+How many studies for each design type? 
+
+b = between, m = mixed, w = within.
+
+```{r}
+
+data_combined |>
+  filter(!is.na(N)) |>
+  distinct(Title, D) |>
+  count(D) |>
+  mutate(percent = janitor::round_half_up(n/sum(n), 2)) |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+
+```
+
+# Table 1 N-Pact Factors 
+
+Using between-persons designs only.
+
+```{r}
+
+# filter to include only between ("b") group designs ("D")
+# Filter out non-social studies published in psych science
+data_table_1_filtered <- data_combined |>
+  filter(
+    D == "b" & 
+      ((Journal == "PS:S" & (Social_PS == 1 | is.na(Social_PS))) | Journal != "PS:S")
+  )
+
+# calculate median N for each Journal and Year
+# round using typical half-up rule and not R's weird rounding
+data_table_1_n_long <- data_table_1_filtered |>
+  group_by(Journal, Year) |>
+  summarize(median_n = janitor::round_half_up(median(N, na.rm = TRUE), 0)) |>
+  ungroup()
+
+# Calculate median median n for each journal
+data_table_1_n_aggregate <- data_table_1_n_long |>
+  group_by(Journal) |>
+  summarize(median_median_n = median(median_n, na.rm = TRUE)) |>
+  ungroup()
+
+# Calculate k studies used to calculate median ns
+data_table_1_k_long <- data_table_1_filtered |>
+  count(Journal, Year, name = "k_studies")
+
+# combine Ns and Ks, reshape, and order Journal column by aggregate median median n 
+data_table_1 <- 
+  full_join(data_table_1_n_long, data_table_1_k_long, by = c("Journal", "Year")) |>
+  mutate(result = paste0(median_n, " (", k_studies, ")")) |>
+  select(-median_n, -k_studies) |>
+  pivot_wider(names_from = Year, 
+              values_from = result) |>
+              #names_prefix = "NF ") |>
+  left_join(data_table_1_n_aggregate, by = "Journal") |>
+  mutate(Journal = fct_reorder(Journal, median_median_n)) |>
+  arrange(desc(Journal))
+
+# print table
+data_table_1 |>
+  select(Journal, 
+         Aggregate = median_median_n, 
+         starts_with("20")) |>
+         #starts_with("NF")) |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+
+```
+
+# Table 2 Estimated Statistical Power 
+
+to Detect an Average Published Effect Size ($\rho$ = .20)
+
+Using between-persons designs only.
+
+```{r}
+
+# use median n to calculate power
+data_table_2_long <- data_table_1_n_long |>
+  mutate(power = janitor::round_half_up(pwr.r.test(r = .2, sig.level = 0.05, n = median_n)$power*100, 0)) |>
+  select(-median_n)
+
+# reshape table, order Journal column by that used in previous table
+data_table_2 <- data_table_2_long |>
+  pivot_wider(names_from = Year, 
+              values_from = power) |>
+              #names_prefix = "power ") |>
+  mutate(Journal = fct_relevel(Journal, levels(data_table_1$Journal))) |>
+  arrange(desc(Journal))
+
+# print table
+data_table_2 |>
+  kable() |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+
+```
+
+# Table 3 Estimated False-Discovery Rates 
+
+Assuming No p-Hacking or Questionable Research Practices
+
+Using between-persons designs only, and various assumptions about the P(null = TRUE)
+
+```{r}
+
+# select a subset power data from first and last year studied, reshape 
+data_power_subset <- data_table_2 |>
+  select(Journal, `2011`, `2019`) |>
+  pivot_longer(cols = c(`2011`, `2019`), 
+               names_to = "Year",
+               values_to = "power") 
+
+# duplicate data with different values of $P(H_0)$,
+# calculate False Discovery Rate
+data_table_3 <- bind_rows(
+  mutate(data_power_subset, baserate_null = .50),
+  mutate(data_power_subset, baserate_null = .80)
+) |>
+  mutate(power = power/100,
+         fdr = janitor::round_half_up( (baserate_null*.05) / (  (baserate_null*.05) + ((1-baserate_null)*power)  ), 2)) |>
+  select(Journal, Year, baserate_null, fdr) |>
+  pivot_wider(names_from = c(Year, baserate_null),
+              values_from = fdr)
+
+# print table
+data_table_3 |>
+  kable(col.names = c("Journal", "$P(H_0)$ = 0.5", "$P(H_0)$ = 0.8", "$P(H_0)$ = 0.5", "$P(H_0)$ = 0.8"),
+        escape = FALSE) |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE) %>%
+  add_header_above(c(" " = 1, "2011" = 2, "2019" = 2))
+
+```
+
+# Figure 1 Illustration of how false-discovery rates vary as a function of statistical power.
+
+(made in a program other than R, I think)
+
+# Figure 2 Change in N-pact over time
+
+Not limited to between-only designs
+
+```{r}
+
+# Filter out non-social studies published in psych science
+# unlike Table 1, do NOT filter group designs ("D")
+# calculate median Ns
+# order Journal column by same used in Table 1
+data_figure_2 <- data_combined |>
+  filter(
+    ((Journal == "PS:S" & (Social_PS == 1 | is.na(Social_PS))) | Journal != "PS:S")
+  ) |>
+  group_by(Journal, Year) |>
+  summarize(median_n = janitor::round_half_up(median(N, na.rm = TRUE), 0)) |>
+  ungroup() |>
+  mutate(Journal = fct_rev(fct_relevel(Journal, levels(data_table_1$Journal))))
+
+# plot 
+ggplot(data_figure_2, aes(as.factor(Year), median_n, color = Journal, group = Journal)) +
+  geom_line() +
+  geom_point() +
+  scale_color_viridis_d(option = "plasma", begin = 0.1, end = 0.9) +
+  theme_classic() +
+  ylab("Median N") +
+  xlab("Year")
+
+```
+
+# Figure 3 Estimated statistical power to detect a population association ($\rho$) of .20 over time
+
+```{r}
+
+# order Journal column by same used in Table 1, then plot
+data_table_2_long |>
+  mutate(Journal = fct_rev(fct_relevel(Journal, levels(data_table_1$Journal)))) |>
+  ggplot(aes(as.factor(Year), power/100, color = Journal, group = Journal)) +
+  geom_hline(yintercept = .80, linetype = "dotted") +
+  geom_line() +
+  geom_point() +
+  scale_color_viridis_d(option = "plasma", begin = 0.1, end = 0.9) +
+  theme_classic() +
+  ylab("Power") +
+  xlab("Year")
+
+```
+
+
