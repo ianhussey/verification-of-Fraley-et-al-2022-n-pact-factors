@@ -235,7 +235,8 @@ data_table_3 <- bind_rows(
          fdr = janitor::round_half_up( (baserate_null*.05) / (  (baserate_null*.05) + ((1-baserate_null)*power)  ), 2)) |>
   select(Journal, Year, baserate_null, fdr) |>
   pivot_wider(names_from = c(Year, baserate_null),
-              values_from = fdr)
+              values_from = fdr) |>
+  select(Journal, `2011_0.5`, `2011_0.8`, `2019_0.5`, `2019_0.8`)
 
 # print table
 data_table_3 |>

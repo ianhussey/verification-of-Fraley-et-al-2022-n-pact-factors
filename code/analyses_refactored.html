@@ -1894,7 +1894,7 @@ border-radius: 0px;
 <h3 class="subtitle">Assessment of computational reproducibility via
 refactoring of Fraley’s code</h3>
 <h4 class="author">Ian Hussey</h4>
-<h4 class="date">03 November, 2022</h4>
+<h4 class="date">04 November, 2022</h4>
 
 </div>
 
@@ -2840,14 +2840,15 @@ P(null = TRUE)</p>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">fdr =</span> janitor<span class="sc">::</span><span class="fu">round_half_up</span>( (baserate_null<span class="sc">*</span>.<span class="dv">05</span>) <span class="sc">/</span> (  (baserate_null<span class="sc">*</span>.<span class="dv">05</span>) <span class="sc">+</span> ((<span class="dv">1</span><span class="sc">-</span>baserate_null)<span class="sc">*</span>power)  ), <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Journal, Year, baserate_null, fdr) <span class="sc">|&gt;</span></span>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> <span class="fu">c</span>(Year, baserate_null),</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> fdr)</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co"># print table</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>data_table_3 <span class="sc">|&gt;</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Journal&quot;</span>, <span class="st">&quot;$P(H_0)$ = 0.5&quot;</span>, <span class="st">&quot;$P(H_0)$ = 0.8&quot;</span>, <span class="st">&quot;$P(H_0)$ = 0.5&quot;</span>, <span class="st">&quot;$P(H_0)$ = 0.8&quot;</span>),</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="at">escape =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">&quot;striped&quot;</span>, <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>), <span class="at">full_width =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_header_above</span>(<span class="fu">c</span>(<span class="st">&quot; &quot;</span> <span class="ot">=</span> <span class="dv">1</span>, <span class="st">&quot;2011&quot;</span> <span class="ot">=</span> <span class="dv">2</span>, <span class="st">&quot;2019&quot;</span> <span class="ot">=</span> <span class="dv">2</span>))</span></code></pre></div>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> fdr) <span class="sc">|&gt;</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Journal, <span class="st">`</span><span class="at">2011_0.5</span><span class="st">`</span>, <span class="st">`</span><span class="at">2011_0.8</span><span class="st">`</span>, <span class="st">`</span><span class="at">2019_0.5</span><span class="st">`</span>, <span class="st">`</span><span class="at">2019_0.8</span><span class="st">`</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co"># print table</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>data_table_3 <span class="sc">|&gt;</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Journal&quot;</span>, <span class="st">&quot;$P(H_0)$ = 0.5&quot;</span>, <span class="st">&quot;$P(H_0)$ = 0.8&quot;</span>, <span class="st">&quot;$P(H_0)$ = 0.5&quot;</span>, <span class="st">&quot;$P(H_0)$ = 0.8&quot;</span>),</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">escape =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">&quot;striped&quot;</span>, <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>), <span class="at">full_width =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_header_above</span>(<span class="fu">c</span>(<span class="st">&quot; &quot;</span> <span class="ot">=</span> <span class="dv">1</span>, <span class="st">&quot;2011&quot;</span> <span class="ot">=</span> <span class="dv">2</span>, <span class="st">&quot;2019&quot;</span> <span class="ot">=</span> <span class="dv">2</span>))</span></code></pre></div>
 <table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2891,10 +2892,10 @@ JRP
 0.05
 </td>
 <td style="text-align:right;">
-0.05
+0.19
 </td>
 <td style="text-align:right;">
-0.19
+0.05
 </td>
 <td style="text-align:right;">
 0.17
@@ -2908,10 +2909,10 @@ EJP
 0.08
 </td>
 <td style="text-align:right;">
-0.05
+0.26
 </td>
 <td style="text-align:right;">
-0.26
+0.05
 </td>
 <td style="text-align:right;">
 0.17
@@ -2925,10 +2926,10 @@ JP
 0.05
 </td>
 <td style="text-align:right;">
-0.05
+0.19
 </td>
 <td style="text-align:right;">
-0.19
+0.05
 </td>
 <td style="text-align:right;">
 0.18
@@ -2942,10 +2943,10 @@ PS:S
 0.11
 </td>
 <td style="text-align:right;">
-0.06
+0.33
 </td>
 <td style="text-align:right;">
-0.33
+0.06
 </td>
 <td style="text-align:right;">
 0.20
@@ -2959,10 +2960,10 @@ SPPS
 0.07
 </td>
 <td style="text-align:right;">
-0.05
+0.24
 </td>
 <td style="text-align:right;">
-0.24
+0.05
 </td>
 <td style="text-align:right;">
 0.17
@@ -2976,10 +2977,10 @@ JPSP
 0.09
 </td>
 <td style="text-align:right;">
-0.05
+0.28
 </td>
 <td style="text-align:right;">
-0.28
+0.05
 </td>
 <td style="text-align:right;">
 0.17
@@ -2993,10 +2994,10 @@ PSPB
 0.08
 </td>
 <td style="text-align:right;">
-0.06
+0.27
 </td>
 <td style="text-align:right;">
-0.27
+0.06
 </td>
 <td style="text-align:right;">
 0.19
@@ -3010,10 +3011,10 @@ EJSP
 0.09
 </td>
 <td style="text-align:right;">
-0.06
+0.29
 </td>
 <td style="text-align:right;">
-0.29
+0.06
 </td>
 <td style="text-align:right;">
 0.21
@@ -3027,10 +3028,10 @@ JESP
 0.09
 </td>
 <td style="text-align:right;">
-0.05
+0.29
 </td>
 <td style="text-align:right;">
-0.29
+0.05
 </td>
 <td style="text-align:right;">
 0.18
